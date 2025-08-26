@@ -83,15 +83,12 @@ namespace ElevatorApp.UI
 
             Console.WriteLine($"\n[User] Requesting elevator for {passengers} passenger(s) at floor {floor}...");
 
-            // Dispatch request to controller
             _controller.RequestElevator(floor, passengers);
 
-            // Process pending requests (in case an elevator freed up)
+            // Try to clear any remainder immediately if a car just freed up
             _controller.ProcessPendingRequests();
 
-            // Print current system state
             _controller.PrintElevatorStatus();
-
             Pause();
         }
 

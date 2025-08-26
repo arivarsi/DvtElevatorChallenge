@@ -13,6 +13,8 @@ namespace ElevatorApp.Domain
         public ElevatorState State { get; private set; }
         public int Capacity { get; }
         public List<Passenger> Passengers { get; }
+        public int AvailableCapacity => Capacity - Passengers.Count;
+
 
         public Elevator(int id, int capacity, int startFloor = 0)
         {

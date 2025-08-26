@@ -7,17 +7,21 @@ using ElevatorApp.Domain.Enums;
 namespace ElevatorApp.Application
 {
     /// <summary>
-    /// Central controller responsible for coordinating multiple elevators.
-    /// - Receives elevator requests
-    /// - Selects the best available elevator (nearest + not full)
-    /// - Handles edge cases (all busy or overloaded)
+    /// Coordinates a fleet of elevators:
+    /// - Greedy, proximity-based dispatch.
+    /// - Splits large passenger groups across multiple elevators when needed.
+    /// - Queues any remainder if total capacity is insufficient.
+    ///
+    /// Design notes (POC-aligned):
+    /// - SRP: Controller only orchestrates; elevators handle movement/load.
+    /// - OCP: Dispatch strategy can be swapped/extended without touching callers.
+    /// - DIP: Depends on elevator abstraction (domain), not concrete UI.
     /// </summary>
     public class ElevatorController
     {
         private readonly List<Elevator> _elevators;
         private readonly List<ElevatorRequest> _pendingRequests;
-        public List<Elevator> GetElevators() => _elevators;
-
+        private int _passengerCounter = 0; // simple ID generator for demo passengers
 
         public ElevatorController(List<Elevator> elevators)
         {
@@ -25,87 +29,53 @@ namespace ElevatorApp.Application
             _pendingRequests = new List<ElevatorRequest>();
         }
 
-        /// <summary>
-        /// Handles an elevator request. 
-        /// If an elevator is available, dispatch it immediately.
-        /// Otherwise, queue the request for later processing.
-        /// </summary>
+        /// <summary>Snapshot for UI/tests.</summary>
+        public IReadOnlyList<Elevator> GetElevators() => _elevators.AsReadOnly();
+
+        /// <summary>Total passengers still queued across all floors.</summary>
+        public int PendingPassengers => _pendingRequests.Sum(r => r.PassengerCount);
+
+        /// <summary>Places a new request; tries to serve immediately; queues any shortfall.</summary>
         public void RequestElevator(int floor, int passengerCount)
         {
+            if (passengerCount <= 0)
+            {
+                Console.WriteLine("[Controller] Ignored non-positive passenger count.");
+                return;
+            }
+
             var request = new ElevatorRequest(floor, passengerCount);
+            var remaining = ServeRequest(request);
 
-            var elevator = FindNearestAvailableElevator(floor, passengerCount);
-
-            if (elevator != null)
+            if (remaining > 0)
             {
-                Console.WriteLine($"[Controller] Dispatching Elevator {elevator.Id} to Floor {floor}");
-                elevator.MoveTo(floor);
-
-                // try to load passengers
-                for (int i = 0; i < passengerCount; i++)
-                {
-                    if (!elevator.IsFull())
-                    {
-                        elevator.LoadPassenger(new Passenger(id: i + 1, destinationFloor: floor + 1)); 
-                        // for demo: assume passengers always want next floor
-                    }
-                    else
-                    {
-                        Console.WriteLine($"[Controller] Elevator {elevator.Id} full! Request partially queued.");
-                        _pendingRequests.Add(new ElevatorRequest(floor, passengerCount - i));
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine($"[Controller] No elevator available. Queuing request for Floor {floor}.");
-                _pendingRequests.Add(request);
+                Console.WriteLine($"[Controller] Not enough capacity now. Queuing {remaining} passenger(s) at floor {floor}.");
+                _pendingRequests.Add(new ElevatorRequest(floor, remaining));
             }
         }
 
-        /// <summary>
-        /// Finds the nearest available elevator that has enough capacity.
-        /// Implements a greedy strategy: choose elevator with the smallest distance to the requested floor.
-        /// </summary>
-        private Elevator? FindNearestAvailableElevator(int floor, int passengerCount)
-        {
-            return _elevators
-                .Where(e => !e.IsFull() && (e.Capacity - e.Passengers.Count) >= passengerCount)
-                .OrderBy(e => Math.Abs(e.CurrentFloor - floor))
-                .FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Processes pending requests in case elevators have become available.
-        /// Should be called periodically or when elevators finish tasks.
-        /// </summary>
+        /// <summary>Re-attempts queued requests using the current state of the fleet.</summary>
         public void ProcessPendingRequests()
         {
-            var handledRequests = new List<ElevatorRequest>();
+            if (_pendingRequests.Count == 0) return;
 
-            foreach (var request in _pendingRequests)
+            var stillPending = new List<ElevatorRequest>();
+
+            foreach (var req in _pendingRequests)
             {
-                var elevator = FindNearestAvailableElevator(request.FloorNumber, request.PassengerCount);
-
-                if (elevator != null)
+                var left = ServeRequest(req);
+                if (left > 0)
                 {
-                    Console.WriteLine($"[Controller] Processing queued request: Dispatching Elevator {elevator.Id} to Floor {request.FloorNumber}");
-                    elevator.MoveTo(request.FloorNumber);
-                    handledRequests.Add(request);
+                    // keep the remainder in queue
+                    stillPending.Add(new ElevatorRequest(req.FloorNumber, left));
                 }
             }
 
-            // Remove completed requests from queue
-            foreach (var r in handledRequests)
-            {
-                _pendingRequests.Remove(r);
-            }
+            _pendingRequests.Clear();
+            _pendingRequests.AddRange(stillPending);
         }
 
-        /// <summary>
-        /// Provides a real-time snapshot of all elevator statuses.
-        /// </summary>
+        /// <summary>Console-friendly status printout.</summary>
         public void PrintElevatorStatus()
         {
             Console.WriteLine("\n=== Elevator Status ===");
@@ -115,7 +85,65 @@ namespace ElevatorApp.Application
                                   $"Direction: {e.Direction}, State: {e.State}, " +
                                   $"Passengers: {e.Passengers.Count}/{e.Capacity}");
             }
+
+            if (_pendingRequests.Count > 0)
+            {
+                var total = _pendingRequests.Sum(r => r.PassengerCount);
+                Console.WriteLine($"Pending (queued) passengers: {total}");
+            }
             Console.WriteLine("========================\n");
         }
+
+        // -------------------------
+        // Internals (strategy bits)
+        // -------------------------
+
+        /// <summary>
+        /// Core strategy: serve a request by using *several* nearest elevators in order,
+        /// loading as many as possible on each, until everyone is served or we run out of capacity.
+        ///
+        /// Returns the number of passengers that couldn't be served right now.
+        /// </summary>
+        private int ServeRequest(ElevatorRequest request)
+        {
+            var remaining = request.PassengerCount;
+
+            // Choose candidates by proximity, then by how empty they are (tie-breaker)
+            var candidates = _elevators
+                .OrderBy(e => Math.Abs(e.CurrentFloor - request.FloorNumber))
+                .ThenByDescending(e => e.AvailableCapacity) // prefer emptier cars
+                .ToList();
+
+            foreach (var elevator in candidates)
+            {
+                if (remaining <= 0) break;
+
+                // Skip cars with no space at all
+                if (elevator.AvailableCapacity <= 0) continue;
+
+                Console.WriteLine($"[Controller] Dispatching Elevator {elevator.Id} to Floor {request.FloorNumber}");
+                elevator.MoveTo(request.FloorNumber);
+
+                // Free space if anyone wants this floor
+                elevator.UnloadPassengersAtCurrentFloor();
+
+                var space = elevator.AvailableCapacity;
+                if (space <= 0) continue;
+
+                var toLoad = Math.Min(space, remaining);
+
+                // Demo: destinations are "next floor up" to keep the POC simple/testable.
+                for (int i = 0; i < toLoad; i++)
+                {
+                    elevator.LoadPassenger(new Passenger(NextPassengerId(), request.FloorNumber + 1));
+                }
+
+                remaining -= toLoad;
+            }
+
+            return remaining;
+        }
+
+        private int NextPassengerId() => ++_passengerCounter;
     }
 }
