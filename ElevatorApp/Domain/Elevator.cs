@@ -24,18 +24,24 @@ namespace ElevatorApp.Domain
 
         public bool IsFull() => Passengers.Count >= Capacity;
 
-        public void MoveTo(int floor)
-        {
-            if (floor > CurrentFloor)
-                Direction = Direction.Up;
-            else if (floor < CurrentFloor)
-                Direction = Direction.Down;
-            else
-                Direction = Direction.Idle;
+     
+      public void MoveTo(int floor)
+      {
+          if (floor > CurrentFloor)
+              Direction = Direction.Up;
+          else if (floor < CurrentFloor)
+              Direction = Direction.Down;
+          else
+              Direction = Direction.Idle;
 
-            CurrentFloor = floor;
-            State = ElevatorState.Moving;
-        }
+          Console.WriteLine($"[Elevator {Id}] Moving from {CurrentFloor} to {floor}...");
+          System.Threading.Thread.Sleep(500); // Simulate travel delay
+          CurrentFloor = floor;
+          State = ElevatorState.Moving;
+
+          Stop(); // once reached, reset state
+      }
+
 
         public void Stop()
         {
