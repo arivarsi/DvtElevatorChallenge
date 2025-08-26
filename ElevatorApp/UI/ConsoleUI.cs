@@ -82,8 +82,17 @@ namespace ElevatorApp.UI
             }
 
             _controller.RequestElevator(floor, passengers);
+           
+            // simulate unloading when elevator arrives
+            foreach (var elevator in _controller.GetElevators())
+            {
+                if (elevator.CurrentFloor == floor)
+                    elevator.UnloadPassengersAtCurrentFloor();
+            }
+
             _controller.PrintElevatorStatus();
             Pause();
+
         }
 
         private void Pause()

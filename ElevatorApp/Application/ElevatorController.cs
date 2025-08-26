@@ -16,6 +16,8 @@ namespace ElevatorApp.Application
     {
         private readonly List<Elevator> _elevators;
         private readonly List<ElevatorRequest> _pendingRequests;
+        public List<Elevator> GetElevators() => _elevators;
+
 
         public ElevatorController(List<Elevator> elevators)
         {

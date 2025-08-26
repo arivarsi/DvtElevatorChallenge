@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using ElevatorApp.Domain.Enums;
 
 namespace ElevatorApp.Domain
@@ -24,24 +26,34 @@ namespace ElevatorApp.Domain
 
         public bool IsFull() => Passengers.Count >= Capacity;
 
-     
-      public void MoveTo(int floor)
-      {
-          if (floor > CurrentFloor)
-              Direction = Direction.Up;
-          else if (floor < CurrentFloor)
-              Direction = Direction.Down;
-          else
-              Direction = Direction.Idle;
+        /// <summary>
+        /// Simulates elevator movement floor-by-floor with delay.
+        /// Provides real-time feedback to the user in the console.
+        /// </summary>
+        public void MoveTo(int targetFloor)
+        {
+            if (targetFloor == CurrentFloor)
+            {
+                Console.WriteLine($"[Elevator {Id}] Already at floor {CurrentFloor}.");
+                return;
+            }
 
-          Console.WriteLine($"[Elevator {Id}] Moving from {CurrentFloor} to {floor}...");
-          System.Threading.Thread.Sleep(500); // Simulate travel delay
-          CurrentFloor = floor;
-          State = ElevatorState.Moving;
+            Direction = targetFloor > CurrentFloor ? Direction.Up : Direction.Down;
+            State = ElevatorState.Moving;
 
-          Stop(); // once reached, reset state
-      }
+            Console.WriteLine($"[Elevator {Id}] Starting at floor {CurrentFloor}, moving {Direction} to floor {targetFloor}...");
 
+            // Move step by step
+            while (CurrentFloor != targetFloor)
+            {
+                Thread.Sleep(500); // simulate travel delay
+                CurrentFloor += (Direction == Direction.Up) ? 1 : -1;
+                Console.WriteLine($"[Elevator {Id}] Now at floor {CurrentFloor}...");
+            }
+
+            Stop();
+            Console.WriteLine($"[Elevator {Id}] Arrived at floor {CurrentFloor}.");
+        }
 
         public void Stop()
         {
@@ -55,13 +67,22 @@ namespace ElevatorApp.Domain
             {
                 Passengers.Add(passenger);
                 State = ElevatorState.Loading;
+                Console.WriteLine($"[Elevator {Id}] Passenger added (dest: {passenger.DestinationFloor}).");
+            }
+            else
+            {
+                Console.WriteLine($"[Elevator {Id}] Cannot load passenger. Capacity reached!");
             }
         }
 
         public void UnloadPassengersAtCurrentFloor()
         {
-            Passengers.RemoveAll(p => p.DestinationFloor == CurrentFloor);
-            State = ElevatorState.Unloading;
+            var offloading = Passengers.RemoveAll(p => p.DestinationFloor == CurrentFloor);
+            if (offloading > 0)
+            {
+                Console.WriteLine($"[Elevator {Id}] {offloading} passenger(s) exited at floor {CurrentFloor}.");
+                State = ElevatorState.Unloading;
+            }
         }
     }
 }

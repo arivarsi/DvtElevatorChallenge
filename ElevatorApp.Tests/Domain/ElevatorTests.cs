@@ -23,10 +23,12 @@ namespace ElevatorApp.Tests.Domain
             var elevator = new Elevator(id: 1, capacity: 5);
             elevator.MoveTo(5);
 
+            // After move is complete
             Assert.Equal(5, elevator.CurrentFloor);
-            Assert.Equal(Direction.Up, elevator.Direction);
-            Assert.Equal(ElevatorState.Moving, elevator.State);
+            Assert.Equal(Direction.Idle, elevator.Direction); // ✅ final state should be Idle
+            Assert.Equal(ElevatorState.Stationary, elevator.State);
         }
+
 
         [Fact]
         public void Elevator_Should_Load_And_Unload_Passengers()
