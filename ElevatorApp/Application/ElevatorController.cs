@@ -40,6 +40,22 @@ namespace ElevatorApp.Application
             {
                 Console.WriteLine($"[Controller] Dispatching Elevator {elevator.Id} to Floor {floor}");
                 elevator.MoveTo(floor);
+
+                // try to load passengers
+                for (int i = 0; i < passengerCount; i++)
+                {
+                    if (!elevator.IsFull())
+                    {
+                        elevator.LoadPassenger(new Passenger(id: i + 1, destinationFloor: floor + 1)); 
+                        // for demo: assume passengers always want next floor
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[Controller] Elevator {elevator.Id} full! Request partially queued.");
+                        _pendingRequests.Add(new ElevatorRequest(floor, passengerCount - i));
+                        break;
+                    }
+                }
             }
             else
             {

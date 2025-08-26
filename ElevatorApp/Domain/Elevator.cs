@@ -61,6 +61,7 @@ namespace ElevatorApp.Domain
             State = ElevatorState.Stationary;
         }
 
+        
         public void LoadPassenger(Passenger passenger)
         {
             if (!IsFull())
@@ -71,9 +72,10 @@ namespace ElevatorApp.Domain
             }
             else
             {
-                Console.WriteLine($"[Elevator {Id}] Cannot load passenger. Capacity reached!");
+                Console.WriteLine($"[Elevator {Id}] Cannot load passenger. Capacity reached! Request must wait.");
             }
         }
+
 
         public void UnloadPassengersAtCurrentFloor()
         {

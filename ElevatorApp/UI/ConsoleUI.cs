@@ -81,19 +81,20 @@ namespace ElevatorApp.UI
                 return;
             }
 
+            Console.WriteLine($"\n[User] Requesting elevator for {passengers} passenger(s) at floor {floor}...");
+
+            // Dispatch request to controller
             _controller.RequestElevator(floor, passengers);
-           
-            // simulate unloading when elevator arrives
-            foreach (var elevator in _controller.GetElevators())
-            {
-                if (elevator.CurrentFloor == floor)
-                    elevator.UnloadPassengersAtCurrentFloor();
-            }
 
+            // Process pending requests (in case an elevator freed up)
+            _controller.ProcessPendingRequests();
+
+            // Print current system state
             _controller.PrintElevatorStatus();
-            Pause();
 
+            Pause();
         }
+
 
         private void Pause()
         {
