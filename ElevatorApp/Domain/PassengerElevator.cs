@@ -10,8 +10,23 @@ namespace ElevatorApp.Domain
     /// </summary>
     public class PassengerElevator : ElevatorBase
     {
+         public List<int> Requests { get; private set; } = new List<int>();
         public PassengerElevator(int id, int capacity, int startFloor = 0)
             : base(id, capacity, startFloor) { }
+      // Method to add a request/floor
+    public void AddRequest(int floor, int passengerCount = 1)
+    {
+        Requests.Add(floor);
+
+         int spaceLeft = Capacity - Passengers.Count;
+    int toAdd = Math.Min(spaceLeft, passengerCount);
+
+    // Add passengers as Passenger objects
+    for (int i = 0; i < toAdd; i++)
+     {
+        Passengers.Add(new Passenger(i,floor));
+     }
+    }
 
         public override void MoveTo(int targetFloor)
         {
