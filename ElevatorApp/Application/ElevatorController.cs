@@ -36,7 +36,7 @@ namespace ElevatorApp.Application
         public int PendingPassengers => _pendingRequests.Sum(r => r.PassengerCount);
 
         /// <summary>Places a new request; tries to serve immediately; queues any shortfall.</summary>
-        public void RequestElevator(int floor, int passengerCount)
+       /* public void RequestElevator(int floor, int passengerCount)
         {
             if (passengerCount <= 0)
             {
@@ -52,7 +52,26 @@ namespace ElevatorApp.Application
                 Console.WriteLine($"[Controller] Not enough capacity now. Queuing {remaining} passenger(s) at floor {floor}.");
                 _pendingRequests.Add(new ElevatorRequest(floor, remaining));
             }
+        }*/
+        // In ElevatorController.cs
+        public void RequestElevator(int floor, int passengers)
+        {
+            ElevatorBase chosenElevator = SelectBestElevator(floor);
+            chosenElevator.AddRequest(floor, passengers);
+            Console.WriteLine($"Assigned Elevator {chosenElevator.Id} to floor {floor} with {passengers} passengers.");
         }
+
+        private ElevatorBase SelectBestElevator(int floor)
+        {
+            var availableElevators = _elevators
+                .Where(e => e.Status == ElevatorStatus.Idle || 
+                            (e.Direction == Direction.Up && e.CurrentFloor <= floor) || 
+                            (e.Direction == Direction.Down && e.CurrentFloor >= floor))
+                .OrderBy(e => Math.Abs(e.CurrentFloor - floor));
+
+            return availableElevators.FirstOrDefault() ?? _elevators.First();
+        }
+
 
         /// <summary>Re-attempts queued requests using the current state of the fleet.</summary>
         public void ProcessPendingRequests()
