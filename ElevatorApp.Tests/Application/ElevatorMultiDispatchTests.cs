@@ -11,10 +11,10 @@ namespace ElevatorApp.Tests.Application
         public void Should_Split_Large_Group_Across_Nearest_Elevators()
         {
             // Keep distances small so the test remains quick
-            var elevators = new List<Elevator>
+            var elevators = new List<ElevatorBase>
             {
-                new Elevator(id: 1, capacity: 2, startFloor: 0),
-                new Elevator(id: 2, capacity: 2, startFloor: 2)
+                new PassengerElevator(id: 1, capacity: 2, startFloor: 0),
+                new PassengerElevator(id: 2, capacity: 2, startFloor: 2)
             };
 
             var controller = new ElevatorController(elevators);

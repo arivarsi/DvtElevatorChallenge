@@ -10,10 +10,10 @@ namespace ElevatorApp.Tests.Application
         [Fact]
         public void Should_Queue_Remainder_When_Total_Capacity_Insufficient()
         {
-            var elevators = new List<Elevator>
+            var elevators = new List<ElevatorBase>
             {
-                new Elevator(id: 1, capacity: 1, startFloor: 0),
-                new Elevator(id: 2, capacity: 1, startFloor: 0)
+                new PassengerElevator(id: 1, capacity: 1, startFloor: 0),
+                new PassengerElevator(id: 2, capacity: 1, startFloor: 0)
             };
 
             var controller = new ElevatorController(elevators);

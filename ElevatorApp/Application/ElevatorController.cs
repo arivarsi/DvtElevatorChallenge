@@ -19,18 +19,18 @@ namespace ElevatorApp.Application
     /// </summary>
     public class ElevatorController
     {
-        private readonly List<Elevator> _elevators;
+        private readonly List<ElevatorBase> _elevators;
         private readonly List<ElevatorRequest> _pendingRequests;
         private int _passengerCounter = 0; // simple ID generator for demo passengers
 
-        public ElevatorController(List<Elevator> elevators)
+        public ElevatorController(List<ElevatorBase> elevators)
         {
             _elevators = elevators ?? throw new ArgumentNullException(nameof(elevators));
             _pendingRequests = new List<ElevatorRequest>();
         }
 
         /// <summary>Snapshot for UI/tests.</summary>
-        public IReadOnlyList<Elevator> GetElevators() => _elevators.AsReadOnly();
+        public IReadOnlyList<ElevatorBase> GetElevators() => _elevators.AsReadOnly();
 
         /// <summary>Total passengers still queued across all floors.</summary>
         public int PendingPassengers => _pendingRequests.Sum(r => r.PassengerCount);

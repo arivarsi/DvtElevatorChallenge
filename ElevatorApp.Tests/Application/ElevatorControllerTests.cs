@@ -10,10 +10,10 @@ namespace ElevatorApp.Tests.Application
         [Fact]
         public void Should_Dispatch_Nearest_Available_Elevator()
         {
-            var elevators = new List<Elevator>
+            var elevators = new List<ElevatorBase>
             {
-                new Elevator(id: 1, capacity: 5, startFloor: 0),
-                new Elevator(id: 2, capacity: 5, startFloor: 10)
+                new PassengerElevator(id: 1, capacity: 5, startFloor: 0),
+                new PassengerElevator(id: 2, capacity: 5, startFloor: 10)
             };
 
             var controller = new ElevatorController(elevators);
@@ -26,10 +26,10 @@ namespace ElevatorApp.Tests.Application
         [Fact]
         public void Should_Queue_Request_When_All_Elevators_Busy()
         {
-            var elevator = new Elevator(id: 1, capacity: 1, startFloor: 0);
+            var elevator = new PassengerElevator(id: 1, capacity: 1, startFloor: 0);
             elevator.LoadPassenger(new Passenger(1, 5)); // fill elevator
 
-            var controller = new ElevatorController(new List<Elevator> { elevator });
+            var controller = new ElevatorController(new List<ElevatorBase> { elevator });
 
             controller.RequestElevator(floor: 3, passengerCount: 2);
 

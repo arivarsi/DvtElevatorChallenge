@@ -10,7 +10,7 @@ namespace ElevatorApp.Tests.Application
         [Fact]
         public void Elevator_Should_Not_Exceed_Capacity()
         {
-            var elevator = new Elevator(id: 1, capacity: 2);
+            var elevator = new PassengerElevator(id: 1, capacity: 2);
 
             elevator.LoadPassenger(new Passenger(1, 5));
             elevator.LoadPassenger(new Passenger(2, 6));
@@ -22,7 +22,7 @@ namespace ElevatorApp.Tests.Application
         [Fact]
         public void Controller_Should_Queue_Request_If_Elevator_Full()
         {
-            var elevators = new List<Elevator> { new Elevator(id: 1, capacity: 1) };
+            var elevators = new List<ElevatorBase> { new PassengerElevator(id: 1, capacity: 1) };
             var controller = new ElevatorController(elevators);
 
             // first request fills the elevator

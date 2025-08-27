@@ -9,7 +9,7 @@ namespace ElevatorApp.Tests.Domain
         [Fact]
         public void Elevator_Should_Start_Stationary_And_Empty()
         {
-            var elevator = new Elevator(id: 1, capacity: 5);
+            var elevator = new PassengerElevator(id: 1, capacity: 5, startFloor: 0);
 
             Assert.Equal(0, elevator.CurrentFloor);
             Assert.Equal(Direction.Idle, elevator.Direction);
@@ -20,7 +20,7 @@ namespace ElevatorApp.Tests.Domain
         [Fact]
         public void Elevator_Should_Move_And_Update_Floor()
         {
-            var elevator = new Elevator(id: 1, capacity: 5);
+            var elevator = new PassengerElevator(id: 1, capacity: 5, startFloor: 1);
             elevator.MoveTo(5);
 
             // After move is complete
@@ -33,7 +33,7 @@ namespace ElevatorApp.Tests.Domain
         [Fact]
         public void Elevator_Should_Load_And_Unload_Passengers()
         {
-            var elevator = new Elevator(id: 1, capacity: 2);
+            var elevator = new PassengerElevator(id: 1, capacity: 2, startFloor: 0);
             var passenger = new Passenger(id: 101, destinationFloor: 3);
 
             elevator.LoadPassenger(passenger);
