@@ -7,6 +7,22 @@ namespace ElevatorApp.Tests.Application
 {
     public class ElevatorMultiDispatchTests
     {
+[Fact]
+public void Test_Dispatch_MultipleElevators()
+{
+var elevators = new List<PassengerElevator>
+{
+new PassengerElevator(1, 0),
+new PassengerElevator(2, 5),
+};
+
+var controller = new ElevatorController(elevators.Cast<ElevatorBase>().ToList());
+
+controller.RequestElevator(3, 2);
+
+Assert.Equal(1, elevators[0].Requests.Count); // closest elevator got the request
+}
+
         [Fact]
         public void Should_Split_Large_Group_Across_Nearest_Elevators()
         {
