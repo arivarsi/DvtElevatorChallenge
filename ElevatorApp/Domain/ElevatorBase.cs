@@ -20,10 +20,16 @@ namespace ElevatorApp.Domain
         public List<Passenger> Passengers { get; }
 
         /// <summary>
-        /// Seconds to travel between adjacent floors. Default 20s for realism.
+        /// Seconds to travel between adjacent floors. Default 2s for realism.
         /// Tests can override this static to speed up (e.g., set to 0 or 1).
         /// </summary>
         public static int SecondsPerFloor { get; set; } = 2;
+        /// <summary>
+        /// Seconds to board passengers  floors. .
+        /// Tests can override this static to speed up (e.g., set to 0 or 1).
+        /// </summary>
+        public static int BoardingSeconds { get; set; } = 5;
+
 
         // --- Events for UI / controller hooks ---
         public event Action<ElevatorBase, int, int>? FloorStep; // (elevator, fromFloor, toFloor)
@@ -63,7 +69,6 @@ namespace ElevatorApp.Domain
                 BecameIdle?.Invoke(this);
                 return;
             }
-            
 
             Direction = targetFloor > CurrentFloor ? Direction.Up : Direction.Down;
             DirectionChanged?.Invoke(this, Direction);
@@ -78,12 +83,13 @@ namespace ElevatorApp.Domain
                 // Simulate travel
                 if (SecondsPerFloor > 0)
                 {
-                    //add boarding time if we are on the floor for passenger pick up
+                    // Add boarding time if we are on the pickup floor
                     if (floorfrom == CurrentFloor)
                     {
-                        Thread.Sleep(TimeSpan.FromSeconds(SecondsPerFloor));
+                        Thread.Sleep(TimeSpan.FromSeconds(BoardingSeconds));
                     }
-                    //add movement time for floor to floor movement
+
+                    // Add movement time for floor-to-floor travel
                     Thread.Sleep(TimeSpan.FromSeconds(SecondsPerFloor));
                 }
 
@@ -98,6 +104,9 @@ namespace ElevatorApp.Domain
                     break;
                 }
             }
+
+            // Ensure final arrival is registered
+            ArrivedAtFloor?.Invoke(this, CurrentFloor);
 
             // Stop at target
             Stop();

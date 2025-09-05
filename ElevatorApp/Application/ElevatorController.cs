@@ -59,58 +59,63 @@ namespace ElevatorApp.Application
                     break;
             }
         }
-       
-        private ElevatorBase SelectBestElevator(int floor,int floorto )
+
+        private ElevatorBase SelectBestElevator(int floor, int floorto)
         {
-            // SCAN-like heuristic: prefer elevators that are moving towards the request (and will pass it),
-            // then idle nearest cars, then moving-away cars by estimated distance.
+            var requestedDirection = floorto > floor ? Direction.Up : Direction.Down;
             var scores = new List<(ElevatorBase e, double score)>();
 
-            //using the 2 inputs we get direction the passenger are supposedly heading
-            var requestedDirection = floorto > floor ? Direction.Up : Direction.Down;
+            foreach (var e in _elevators)
+            {
+                //  Skip freight elevators for passenger requests
+                if (e is FreightElevator)
+                    continue;
 
-                foreach (var e in _elevators)
+                double score = 0;
+                int dist = Math.Abs(e.CurrentFloor - floor);
+
+                // Case 1: elevator moving in same direction as request AND will pass pickup
+                if (e.Direction == requestedDirection)
                 {
-                    double score = 0;
-                    int dist = Math.Abs(e.CurrentFloor - floor);
-
-                    // Case 1: elevator moving in same direction as request AND will pass pickup
-                    if (e.Direction == requestedDirection)
+                    if ((requestedDirection == Direction.Up && e.CurrentFloor <= floor) ||
+                        (requestedDirection == Direction.Down && e.CurrentFloor >= floor))
                     {
-                        if ((requestedDirection == Direction.Up && e.CurrentFloor <= floor) ||
-                            (requestedDirection == Direction.Down && e.CurrentFloor >= floor))
-                        {
-                            score -= 200 - dist; // strong preference
-                        }
-                        else
-                        {
-                            score += 50 + dist; // going wrong way, but same direction eventually
-                        }
+                        score -= 200 - dist; // strong preference
                     }
-                    // Case 2: elevator is idle
-                    else if (e.Direction == Direction.Idle)
-                    {
-                        score -= 100 - dist; // idle elevators: prefer closer ones
-                    }
-                    // Case 3: elevator moving opposite direction
                     else
                     {
-                        score += 200 + dist; // penalize moving away
+                        score += 50 + dist; // going wrong way, but same direction eventually
                     }
-
-                    // Small bonus for emptier elevators (avoid overloading)
-                    score += (e.Capacity - e.Passengers.Count) * -0.5;
-
-                    scores.Add((e, score));
+                }
+                // Case 2: elevator is idle
+                else if (e.Direction == Direction.Idle)
+                {
+                    score -= 100 - dist; // idle elevators: prefer closer ones
+                }
+                // Case 3: elevator moving opposite direction
+                else
+                {
+                    score += 200 + dist; // penalize moving away
                 }
 
-                // lowest score = best candidate
-                return scores.OrderBy(s => s.score).First().e;
+                // Small bonus for emptier elevators (avoid overloading)
+                score += (e.Capacity - e.Passengers.Count) * -0.5;
+
+                scores.Add((e, score));
             }
 
+            // fallback: if no passenger elevators, allow freight
+            if (!scores.Any())
+            {
+                return _elevators.OfType<FreightElevator>().FirstOrDefault()
+                       ?? _elevators.First(); // ensure something is returned
+            }
+
+            return scores.OrderBy(s => s.score).First().e;
+        }
 
 
-            /// <summary>Re-attempts queued requests using the current state of the fleet.</summary>
+        /// <summary>Re-attempts queued requests using the current state of the fleet.</summary>
         public void ProcessPendingRequests()
         {
             if (_pendingRequests.Count == 0) return;

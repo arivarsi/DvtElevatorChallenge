@@ -29,14 +29,15 @@ namespace ElevatorApp.UI
             {
                 while (!stop)
                 {
-                   // Console.Clear();
+                    Console.Clear();
                     Console.WriteLine("=== DVT Elevator Challenge (Real-time) ===");
                     _controller.PrintElevatorStatus();
-                    System.Threading.Thread.Sleep(10000);
                     Console.WriteLine("Controls: 1) Call Elevator  2) Process Pending Requests  3) Show Elevator Status  q) Quit");
 
+                    System.Threading.Thread.Sleep(1000); // refresh every second
                 }
             });
+
 
             while (true)
             {
@@ -47,17 +48,23 @@ namespace ElevatorApp.UI
 
                     switch (key.KeyChar)
                     {
+                        
                         case '1':
-                            Console.Write(" Enter floor to call: ");
+                            //stop printing elevator status  because we do not want printing overwriting instructions for data entry
+                            stop = true;
+                            Console.Write(" Enter floor to pick up: ");
                             if (int.TryParse(Console.ReadLine(), out var floor))
                             {
+                                Console.Write(" Enter destination Floor: ");
+                                int.TryParse(Console.ReadLine(), out var floorto);
+
                                 Console.Write(" Passengers: ");
                                 int.TryParse(Console.ReadLine(), out var pcount);
 
-                                Console.Write(" Enter destination Floor: ");
-                                int.TryParse(Console.ReadLine(), out var floorto);
                                 _controller.RequestElevator(floor,floorto, pcount == 0 ? 1 : pcount);
                             }
+
+                            stop = false; //continue after data entry
                             break;
                         case '2':
                             _controller.ProcessPendingRequests();
@@ -70,6 +77,7 @@ namespace ElevatorApp.UI
                         default:
                             break;
                     }
+                   // stop = false; //continue after data entry
                 }
                 else
                 {
@@ -77,7 +85,7 @@ namespace ElevatorApp.UI
                 }
             }
 
-            stop = true;
+           stop = false;//continue after data entry
         }
 
         private void Pause()
