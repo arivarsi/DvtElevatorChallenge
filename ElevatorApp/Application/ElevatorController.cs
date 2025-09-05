@@ -177,8 +177,8 @@ namespace ElevatorApp.Application
                 // Skip cars with no space at all
                 if (elevator.AvailableCapacity <= 0) continue;
 
-                Console.WriteLine($"[Controller] Dispatching Elevator {elevator.Id} to Floor {request.FloorNumber}");
-                elevator.MoveTo(request.FloorNumber);
+                Console.WriteLine($"[Controller] Dispatching Elevator {elevator.Id} to Floor {request.FloorNumber} to carry passengers to {request.FloortoNumber}");
+                elevator.MoveTo(request.FloorNumber ,request.FloortoNumber);
 
                 // Free space if anyone wants this floor
                 elevator.UnloadPassengersAtCurrentFloor();
@@ -187,11 +187,19 @@ namespace ElevatorApp.Application
                 if (space <= 0) continue;
 
                 var toLoad = Math.Min(space, remaining);
+                Console.WriteLine($"{space} places avilable in elevator sent to to Floor {request.FloorNumber}. {remaining} passengers remaining");
 
                 // Demo: destinations are "next floor up" to keep the POC simple/testable.
                 for (int i = 0; i < toLoad; i++)
                 {
                     elevator.LoadPassenger(new Passenger(NextPassengerId(), request.FloorNumber + 1));
+
+                    //keep moving till the lift gets to the floor
+                    do
+                    {
+                        elevator.MoveTo(request.FloorNumber ,request.FloortoNumber);
+
+                    } while (elevator.CurrentFloor != request.FloortoNumber);
                 }
 
                 remaining -= toLoad;

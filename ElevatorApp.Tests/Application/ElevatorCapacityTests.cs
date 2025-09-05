@@ -29,10 +29,10 @@ namespace ElevatorApp.Tests.Application
             var controller = new ElevatorController(elevators);
 
             // first request fills the elevator
-            controller.RequestElevator(floor: 1, passengerCount: 1);
+            controller.RequestElevator(floor: 1,floorto:6, passengerCount: 1);
 
             // second request should be queued
-            controller.RequestElevator(floor: 2, passengerCount: 2);
+            controller.RequestElevator(floor: 2, floorto:6,passengerCount: 2);
 
             controller.ProcessPendingRequests();
 

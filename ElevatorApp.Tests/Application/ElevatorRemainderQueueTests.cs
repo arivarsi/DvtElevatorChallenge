@@ -21,7 +21,7 @@ namespace ElevatorApp.Tests.Application
             var controller = new ElevatorController(elevators);
 
             // Request exceeds total capacity (2)
-            controller.RequestElevator(floor: 0, passengerCount: 5);
+            controller.RequestElevator(floor: 0, floorto: 4, passengerCount: 5);
 
             // 2 onboard, 3 should be queued
             Assert.Equal(2, elevators[0].Passengers.Count + elevators[1].Passengers.Count);

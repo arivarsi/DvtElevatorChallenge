@@ -23,7 +23,7 @@ namespace ElevatorApp.Domain
         /// Seconds to travel between adjacent floors. Default 20s for realism.
         /// Tests can override this static to speed up (e.g., set to 0 or 1).
         /// </summary>
-        public static int SecondsPerFloor { get; set; } = 4;
+        public static int SecondsPerFloor { get; set; } = 2;
 
         // --- Events for UI / controller hooks ---
         public event Action<ElevatorBase, int, int>? FloorStep; // (elevator, fromFloor, toFloor)
@@ -52,7 +52,7 @@ namespace ElevatorApp.Domain
         /// SecondsPerFloor = 0.
         /// </summary>
         /// <param name="targetFloor">Destination floor</param>
-        protected void MoveOneStepLoop(int targetFloor)
+        protected void MoveOneStepLoop(int floorfrom, int targetFloor)
         {
             if (targetFloor == CurrentFloor)
             {
@@ -63,6 +63,7 @@ namespace ElevatorApp.Domain
                 BecameIdle?.Invoke(this);
                 return;
             }
+            
 
             Direction = targetFloor > CurrentFloor ? Direction.Up : Direction.Down;
             DirectionChanged?.Invoke(this, Direction);
@@ -77,6 +78,12 @@ namespace ElevatorApp.Domain
                 // Simulate travel
                 if (SecondsPerFloor > 0)
                 {
+                    //add boarding time if we are on the floor for passenger pick up
+                    if (floorfrom == CurrentFloor)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(SecondsPerFloor));
+                    }
+                    //add movement time for floor to floor movement
                     Thread.Sleep(TimeSpan.FromSeconds(SecondsPerFloor));
                 }
 
@@ -98,7 +105,7 @@ namespace ElevatorApp.Domain
         }
 
         // --- Abstract operations (kept for compatibility with your design) ---
-        public abstract void MoveTo(int targetFloor);
+        public abstract void MoveTo(int floorfrom, int targetFloor);
         public abstract void Stop();
         public abstract void LoadPassenger(Passenger passenger);
         public abstract void UnloadPassengersAtCurrentFloor();

@@ -28,7 +28,7 @@ namespace ElevatorApp.Domain
              }
         }
 
-        public override void MoveTo(int targetFloor)
+        public override void MoveTo(int floorfrom, int targetFloor)
         {
             if (targetFloor == CurrentFloor)
             {
@@ -37,7 +37,7 @@ namespace ElevatorApp.Domain
             }
 
             Console.WriteLine($"[PassengerElevator {Id}] Starting at {CurrentFloor}, moving to {targetFloor}...");
-            MoveOneStepLoop(targetFloor);
+            MoveOneStepLoop(floorfrom, targetFloor);
             Console.WriteLine($"[PassengerElevator {Id}] Arrived at floor {CurrentFloor}.");
         }
 

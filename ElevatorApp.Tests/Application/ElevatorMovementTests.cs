@@ -12,7 +12,7 @@ namespace ElevatorApp.Tests.Domain
             ElevatorBase.SecondsPerFloor = 0;
             var elevator = new PassengerElevator(id: 1, capacity: 5, startFloor: 0);
 
-            elevator.MoveTo(3);
+            elevator.MoveTo(3,2);
 
             Assert.Equal(3, elevator.CurrentFloor);
             Assert.Equal(ElevatorState.Stationary, elevator.State);
@@ -24,7 +24,7 @@ namespace ElevatorApp.Tests.Domain
             ElevatorBase.SecondsPerFloor = 0;
             var elevator = new PassengerElevator(id: 1, capacity: 5, startFloor: 2);
 
-            elevator.MoveTo(2);
+            elevator.MoveTo(2, 5);
 
             Assert.Equal(2, elevator.CurrentFloor);
             Assert.Equal(ElevatorState.Stationary, elevator.State);

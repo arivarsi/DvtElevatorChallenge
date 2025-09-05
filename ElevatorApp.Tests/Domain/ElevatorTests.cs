@@ -23,7 +23,7 @@ namespace ElevatorApp.Tests.Domain
         {
             ElevatorBase.SecondsPerFloor = 0;
             var elevator = new PassengerElevator(id: 1, capacity: 5, startFloor: 1);
-            elevator.MoveTo(5);
+            elevator.MoveTo(5,0);
 
             // After move is complete
             Assert.Equal(5, elevator.CurrentFloor);
@@ -43,7 +43,7 @@ namespace ElevatorApp.Tests.Domain
 
             Assert.Single(elevator.Passengers);
 
-            elevator.MoveTo(3);
+            elevator.MoveTo(3,5);
             elevator.UnloadPassengersAtCurrentFloor();
 
             Assert.Empty(elevator.Passengers);

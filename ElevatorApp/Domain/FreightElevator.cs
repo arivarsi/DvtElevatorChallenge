@@ -22,13 +22,13 @@ namespace ElevatorApp.Domain
             Console.WriteLine($"[FreightElevator {Id}] Request added for floor {floor} (LoadUnits: {loadUnits}).");
         }
 
-        public override void MoveTo(int targetFloor)
+        public override void MoveTo(int floorfrom, int targetFloor)
         {
             Direction = targetFloor > CurrentFloor ? Direction.Up : Direction.Down;
             State = ElevatorState.Moving;
 
             Console.WriteLine($"[FreightElevator {Id}] Moving goods from floor {CurrentFloor} to {targetFloor}...");
-            MoveOneStepLoop(targetFloor);
+            MoveOneStepLoop(floorfrom,targetFloor);
         }
 
         public override void Stop()

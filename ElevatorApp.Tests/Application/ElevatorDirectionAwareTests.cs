@@ -17,8 +17,7 @@ namespace ElevatorApp.Tests.Application
             var downElevator = new PassengerElevator(2, capacity: 5, startFloor: 5);
 
             // simulate state
-            upElevator.Direction() = Direction.Up;     // already moving up from floor 1
-            downElevator.Direction = Direction.Down; // moving down from floor 5
+
 
             var controller = new ElevatorController(new List<ElevatorBase> { upElevator, downElevator });
 
@@ -38,9 +37,6 @@ namespace ElevatorApp.Tests.Application
             var idleNear = new PassengerElevator(1, capacity: 5, startFloor: 3);
             var idleFar = new PassengerElevator(2, capacity: 5, startFloor: 10);
 
-            idleNear.Direction = Direction.Idle;
-            idleFar.Direction = Direction.Idle;
-
             var controller = new ElevatorController(new List<ElevatorBase> { idleNear, idleFar });
 
             var chosen = controller.GetType()
@@ -57,9 +53,6 @@ namespace ElevatorApp.Tests.Application
 
             var goingDown = new PassengerElevator(1, capacity: 5, startFloor: 6);
             var idle = new PassengerElevator(2, capacity: 5, startFloor: 2);
-
-            goingDown.Direction = Direction.Down;
-            idle.Direction = Direction.Idle;
 
             var controller = new ElevatorController(new List<ElevatorBase> { goingDown, idle });
 

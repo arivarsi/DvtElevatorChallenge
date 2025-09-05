@@ -41,7 +41,7 @@ namespace ElevatorApp.Tests.Application
             var controller = new ElevatorController(elevators);
 
             // 3 passengers at floor 1; first car can take 2, second takes 1
-            controller.RequestElevator(floor: 1, passengerCount: 3);
+            controller.RequestElevator(floor: 1,floorto:3, passengerCount: 3);
 
             Assert.Equal(1, elevators[0].CurrentFloor);
             Assert.Equal(1, elevators[1].CurrentFloor);

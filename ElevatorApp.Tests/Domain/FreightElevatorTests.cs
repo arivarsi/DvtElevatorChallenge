@@ -9,7 +9,7 @@ namespace ElevatorApp.Tests.Domain
         public void FreightElevator_Should_Move_To_Target_Floor()
         {
             var freight = new FreightElevator(id: 99, capacity: 10, startFloor: 0);
-            freight.MoveTo(5);
+            freight.MoveTo(4,5);
 
             Assert.Equal(5, freight.CurrentFloor);
             Assert.Equal(0, freight.Passengers.Count); // none by default
