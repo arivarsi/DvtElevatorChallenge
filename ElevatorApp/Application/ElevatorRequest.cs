@@ -7,11 +7,13 @@ namespace ElevatorApp.Application
     {
         public int FloorNumber { get; }
         public int PassengerCount { get; }
+        public int FloortoNumber { get; set; }
 
-        public ElevatorRequest(int floorNumber, int passengerCount)
+        public ElevatorRequest(int floorNumber, int floortoNumber, int passengerCount)
         {
             FloorNumber = floorNumber;
             PassengerCount = passengerCount;
+            FloortoNumber = floortoNumber;
         }
     }
 }

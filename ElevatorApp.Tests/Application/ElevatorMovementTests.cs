@@ -9,6 +9,7 @@ namespace ElevatorApp.Tests.Domain
         [Fact]
         public void Elevator_Should_Reach_Target_Floor()
         {
+            ElevatorBase.SecondsPerFloor = 0;
             var elevator = new PassengerElevator(id: 1, capacity: 5, startFloor: 0);
 
             elevator.MoveTo(3);
@@ -20,6 +21,7 @@ namespace ElevatorApp.Tests.Domain
         [Fact]
         public void Elevator_Should_Not_Move_If_Already_At_Target()
         {
+            ElevatorBase.SecondsPerFloor = 0;
             var elevator = new PassengerElevator(id: 1, capacity: 5, startFloor: 2);
 
             elevator.MoveTo(2);

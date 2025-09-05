@@ -23,75 +23,62 @@ namespace ElevatorApp.UI
         /// </summary>
         public void Run()
         {
+            // Start a background refresh loop
+            var stop = false;
+            Task.Run(() =>
+            {
+                while (!stop)
+                {
+                   // Console.Clear();
+                    Console.WriteLine("=== DVT Elevator Challenge (Real-time) ===");
+                    _controller.PrintElevatorStatus();
+                    System.Threading.Thread.Sleep(10000);
+                    Console.WriteLine("Controls: 1) Call Elevator  2) Process Pending Requests  3) Show Elevator Status  q) Quit");
+
+                }
+            });
+
             while (true)
             {
-                Console.Clear();
-                Console.WriteLine("=== DVT Elevator Challenge ===");
-                Console.WriteLine("1. Call Elevator");
-                Console.WriteLine("2. Process Pending Requests");
-                Console.WriteLine("3. Show Elevator Status");
-                Console.WriteLine("4. Exit");
-                Console.Write("Choose an option: ");
-
-                var choice = Console.ReadLine();
-
-                switch (choice)
+                if (Console.KeyAvailable)
                 {
-                    case "1":
-                        HandleElevatorRequest();
-                        break;
-                    case "2":
-                        _controller.ProcessPendingRequests();
-                        Console.WriteLine("Processed pending requests.");
-                        Pause();
-                        break;
-                    case "3":
-                        _controller.PrintElevatorStatus();
-                        Pause();
-                        break;
-                    case "4":
-                        Console.WriteLine("Exiting... Goodbye!");
-                        return;
-                    default:
-                        Console.WriteLine("Invalid option. Please try again.");
-                        Pause();
-                        break;
+                    var key = Console.ReadKey(true);
+                    if (key.KeyChar == 'q') break;
+
+                    switch (key.KeyChar)
+                    {
+                        case '1':
+                            Console.Write(" Enter floor to call: ");
+                            if (int.TryParse(Console.ReadLine(), out var floor))
+                            {
+                                Console.Write(" Passengers: ");
+                                int.TryParse(Console.ReadLine(), out var pcount);
+
+                                Console.Write(" Enter destination Floor: ");
+                                int.TryParse(Console.ReadLine(), out var floorto);
+                                _controller.RequestElevator(floor,floorto, pcount == 0 ? 1 : pcount);
+                            }
+                            break;
+                        case '2':
+                            _controller.ProcessPendingRequests();
+                            break;
+                        case '3':
+                            Console.Clear();
+                            _controller.PrintElevatorStatus();
+                            Console.WriteLine("Press any key to continue..."); Console.ReadKey(true);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    System.Threading.Thread.Sleep(200);
                 }
             }
+
+            stop = true;
         }
-
-        /// <summary>
-        /// Prompts user for floor and passenger input, then requests an elevator.
-        /// </summary>
-        private void HandleElevatorRequest()
-        {
-            Console.Write("Enter floor number: ");
-            if (!int.TryParse(Console.ReadLine(), out var floor))
-            {
-                Console.WriteLine("Invalid floor number.");
-                Pause();
-                return;
-            }
-
-            Console.Write("Enter number of passengers: ");
-            if (!int.TryParse(Console.ReadLine(), out var passengers))
-            {
-                Console.WriteLine("Invalid passenger count.");
-                Pause();
-                return;
-            }
-
-            Console.WriteLine($"\n[User] Requesting elevator for {passengers} passenger(s) at floor {floor}...");
-
-            _controller.RequestElevator(floor, passengers);
-
-            // Try to clear any remainder immediately if a car just freed up
-            _controller.ProcessPendingRequests();
-
-            _controller.PrintElevatorStatus();
-            Pause();
-        }
-
 
         private void Pause()
         {

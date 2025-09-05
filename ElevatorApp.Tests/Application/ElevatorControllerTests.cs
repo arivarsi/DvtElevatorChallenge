@@ -10,6 +10,8 @@ namespace ElevatorApp.Tests.Application
         [Fact]
         public void Should_Dispatch_Nearest_Available_Elevator()
         {
+            ElevatorBase.SecondsPerFloor = 0;
+            ElevatorBase.SecondsPerFloor = 0;
             var elevators = new List<ElevatorBase>
             {
                 new PassengerElevator(id: 1, capacity: 5, startFloor: 0),
@@ -26,6 +28,7 @@ namespace ElevatorApp.Tests.Application
         [Fact]
         public void Should_Queue_Request_When_All_Elevators_Busy()
         {
+            ElevatorBase.SecondsPerFloor = 0;
             var elevator = new PassengerElevator(id: 1, capacity: 1, startFloor: 0);
             elevator.LoadPassenger(new Passenger(1, 5)); // fill elevator
 

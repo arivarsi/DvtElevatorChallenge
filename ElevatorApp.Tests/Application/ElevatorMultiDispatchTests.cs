@@ -10,7 +10,9 @@ namespace ElevatorApp.Tests.Application
   [Fact]
   public void Test_Dispatch_MultipleElevators()
    {
-     var elevators = new List<PassengerElevator>
+     ElevatorBase.SecondsPerFloor = 0;
+            ElevatorBase.SecondsPerFloor = 0;
+            var elevators = new List<PassengerElevator>
       {
         new PassengerElevator(1, 0),
         new PassengerElevator(2, 5),
@@ -28,6 +30,8 @@ namespace ElevatorApp.Tests.Application
         public void Should_Split_Large_Group_Across_Nearest_Elevators()
         {
             // Keep distances small so the test remains quick
+            ElevatorBase.SecondsPerFloor = 0;
+            ElevatorBase.SecondsPerFloor = 0;
             var elevators = new List<ElevatorBase>
             {
                 new PassengerElevator(id: 1, capacity: 2, startFloor: 0),

@@ -9,8 +9,18 @@ namespace ElevatorApp.Domain
     /// </summary>
     public class FreightElevator : ElevatorBase
     {
+
+        public List<int> Requests { get; } = new List<int>();
+
         public FreightElevator(int id, int capacity, int startFloor = 0)
             : base(id, capacity, startFloor) { }
+
+        /// <summary>Add a freight/utility request for a floor.</summary>
+        public void AddFreightRequest(int floor, int loadUnits = 0)
+        {
+            Requests.Add(floor);
+            Console.WriteLine($"[FreightElevator {Id}] Request added for floor {floor} (LoadUnits: {loadUnits}).");
+        }
 
         public override void MoveTo(int targetFloor)
         {
@@ -18,10 +28,7 @@ namespace ElevatorApp.Domain
             State = ElevatorState.Moving;
 
             Console.WriteLine($"[FreightElevator {Id}] Moving goods from floor {CurrentFloor} to {targetFloor}...");
-            // Freight elevator: simulate being slower
-            System.Threading.Thread.Sleep(1000);
-            CurrentFloor = targetFloor;
-            Stop();
+            MoveOneStepLoop(targetFloor);
         }
 
         public override void Stop()
@@ -29,6 +36,7 @@ namespace ElevatorApp.Domain
             Direction = Direction.Idle;
             State = ElevatorState.Stationary;
         }
+        
 
         public override void LoadPassenger(Passenger passenger)
         {
@@ -44,5 +52,7 @@ namespace ElevatorApp.Domain
         {
             Passengers.RemoveAll(p => p.DestinationFloor == CurrentFloor);
         }
+
+       
     }
 }

@@ -14,19 +14,19 @@ namespace ElevatorApp.Domain
         public PassengerElevator(int id, int capacity, int startFloor = 0)
             : base(id, capacity, startFloor) { }
       // Method to add a request/floor
-    public void AddRequest(int floor, int passengerCount = 1)
-    {
-        Requests.Add(floor);
+        public void AddRequest(int floor, int passengerCount = 1)
+        {
+            Requests.Add(floor);
 
-         int spaceLeft = Capacity - Passengers.Count;
-    int toAdd = Math.Min(spaceLeft, passengerCount);
+             int spaceLeft = Capacity - Passengers.Count;
+              int toAdd = Math.Min(spaceLeft, passengerCount);
 
-    // Add passengers as Passenger objects
-    for (int i = 0; i < toAdd; i++)
-     {
-        Passengers.Add(new Passenger(i,floor));
-     }
-    }
+            // Add passengers as Passenger objects
+            for (int i = 0; i < toAdd; i++)
+             {
+                Passengers.Add(new Passenger(i,floor));
+             }
+        }
 
         public override void MoveTo(int targetFloor)
         {
@@ -36,19 +36,8 @@ namespace ElevatorApp.Domain
                 return;
             }
 
-            Direction = targetFloor > CurrentFloor ? Direction.Up : Direction.Down;
-            State = ElevatorState.Moving;
-
-            Console.WriteLine($"[PassengerElevator {Id}] Starting at floor {CurrentFloor}, moving {Direction} to floor {targetFloor}...");
-
-            while (CurrentFloor != targetFloor)
-            {
-                Thread.Sleep(500); // simulate delay
-                CurrentFloor += (Direction == Direction.Up) ? 1 : -1;
-                Console.WriteLine($"[PassengerElevator {Id}] Now at floor {CurrentFloor}...");
-            }
-
-            Stop();
+            Console.WriteLine($"[PassengerElevator {Id}] Starting at {CurrentFloor}, moving to {targetFloor}...");
+            MoveOneStepLoop(targetFloor);
             Console.WriteLine($"[PassengerElevator {Id}] Arrived at floor {CurrentFloor}.");
         }
 
@@ -57,6 +46,7 @@ namespace ElevatorApp.Domain
             Direction = Direction.Idle;
             State = ElevatorState.Stationary;
         }
+       
 
         public override void LoadPassenger(Passenger passenger)
         {

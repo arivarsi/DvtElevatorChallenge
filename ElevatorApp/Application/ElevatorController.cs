@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ElevatorApp.Domain;
 using ElevatorApp.Domain.Enums;
+using System.Threading.Tasks;
 
 namespace ElevatorApp.Application
 {
@@ -37,28 +38,79 @@ namespace ElevatorApp.Application
 
         /// <summary>Places a new request; tries to serve immediately; queues any shortfall.</summary>
     
-        public void RequestElevator(int floor, int passengerCount)
+        public void RequestElevator(int floor, int floorto , int passengerCount)
         {
             // Select closest elevator
-            var chosenElevator = SelectBestElevator(floor);
+            var chosenElevator = SelectBestElevator(floor, floorto);
 
             // Add request and passengers
-            ((PassengerElevator)chosenElevator).AddRequest(floor, passengerCount);
+            // Add request and passengers
+            switch (chosenElevator)
+            {
+                case PassengerElevator pe:
+                    pe.AddRequest(floor, passengerCount);
+                    break;
+                case FreightElevator fe:
+                    // Treat passengerCount as "load units" for freight requests (configurable)
+                    fe.AddFreightRequest(floor, passengerCount);
+                    break;
+                default:
+                    Console.WriteLine($"[Controller] Elevator {chosenElevator.Id} cannot accept this request type.");
+                    break;
+            }
         }
        
-        private ElevatorBase SelectBestElevator(int floor)
+        private ElevatorBase SelectBestElevator(int floor,int floorto )
         {
-            var availableElevators = _elevators
-                .Where(e => e.Direction == Direction.Idle || 
-                            (e.Direction == Direction.Up && e.CurrentFloor <= floor) || 
-                            (e.Direction == Direction.Down && e.CurrentFloor >= floor))
-                .OrderBy(e => Math.Abs(e.CurrentFloor - floor));
+            // SCAN-like heuristic: prefer elevators that are moving towards the request (and will pass it),
+            // then idle nearest cars, then moving-away cars by estimated distance.
+            var scores = new List<(ElevatorBase e, double score)>();
 
-            return availableElevators.FirstOrDefault() ?? _elevators.First();
-        }
+            //using the 2 inputs we get direction the passenger are supposedly heading
+            var requestedDirection = floorto > floor ? Direction.Up : Direction.Down;
+
+                foreach (var e in _elevators)
+                {
+                    double score = 0;
+                    int dist = Math.Abs(e.CurrentFloor - floor);
+
+                    // Case 1: elevator moving in same direction as request AND will pass pickup
+                    if (e.Direction == requestedDirection)
+                    {
+                        if ((requestedDirection == Direction.Up && e.CurrentFloor <= floor) ||
+                            (requestedDirection == Direction.Down && e.CurrentFloor >= floor))
+                        {
+                            score -= 200 - dist; // strong preference
+                        }
+                        else
+                        {
+                            score += 50 + dist; // going wrong way, but same direction eventually
+                        }
+                    }
+                    // Case 2: elevator is idle
+                    else if (e.Direction == Direction.Idle)
+                    {
+                        score -= 100 - dist; // idle elevators: prefer closer ones
+                    }
+                    // Case 3: elevator moving opposite direction
+                    else
+                    {
+                        score += 200 + dist; // penalize moving away
+                    }
+
+                    // Small bonus for emptier elevators (avoid overloading)
+                    score += (e.Capacity - e.Passengers.Count) * -0.5;
+
+                    scores.Add((e, score));
+                }
+
+                // lowest score = best candidate
+                return scores.OrderBy(s => s.score).First().e;
+            }
 
 
-        /// <summary>Re-attempts queued requests using the current state of the fleet.</summary>
+
+            /// <summary>Re-attempts queued requests using the current state of the fleet.</summary>
         public void ProcessPendingRequests()
         {
             if (_pendingRequests.Count == 0) return;
@@ -71,7 +123,7 @@ namespace ElevatorApp.Application
                 if (left > 0)
                 {
                     // keep the remainder in queue
-                    stillPending.Add(new ElevatorRequest(req.FloorNumber, left));
+                    stillPending.Add(new ElevatorRequest(req.FloorNumber,req.FloortoNumber, left));
                 }
             }
 
