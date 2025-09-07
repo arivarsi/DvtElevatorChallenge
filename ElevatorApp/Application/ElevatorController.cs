@@ -40,6 +40,9 @@ namespace ElevatorApp.Application
     
         public void RequestElevator(int floor, int floorto , int passengerCount)
         {
+            // 🚀 Immediately show updated state
+            Console.Clear();
+            Console.WriteLine($"Requesting lift from floor {floor} to floor {floorto} for {passengerCount} passengers");
             // Select closest elevator
             var chosenElevator = SelectBestElevator(floor, floorto);
 
@@ -48,7 +51,7 @@ namespace ElevatorApp.Application
             switch (chosenElevator)
             {
                 case PassengerElevator pe:
-                    pe.AddRequest(floor, passengerCount);
+                    pe.AddRequest(floor,floorto, passengerCount);
                     break;
                 case FreightElevator fe:
                     // Treat passengerCount as "load units" for freight requests (configurable)
@@ -169,43 +172,39 @@ namespace ElevatorApp.Application
         {
             var remaining = request.PassengerCount;
 
-            // Choose candidates by proximity, then by how empty they are (tie-breaker)
+            // Choose candidates by proximity, then by how empty they are
             var candidates = _elevators
                 .OrderBy(e => Math.Abs(e.CurrentFloor - request.FloorNumber))
-                .ThenByDescending(e => e.AvailableCapacity) // prefer emptier cars
+                .ThenByDescending(e => e.AvailableCapacity)
                 .ToList();
 
             foreach (var elevator in candidates)
             {
                 if (remaining <= 0) break;
 
-                // Skip cars with no space at all
                 if (elevator.AvailableCapacity <= 0) continue;
 
                 Console.WriteLine($"[Controller] Dispatching Elevator {elevator.Id} to Floor {request.FloorNumber} to carry passengers to {request.FloortoNumber}");
-                elevator.MoveTo(request.FloorNumber ,request.FloortoNumber);
 
-                // Free space if anyone wants this floor
+                // First move elevator to pickup floor
+                elevator.MoveTo(elevator.CurrentFloor, request.FloorNumber);
+
+                // Unload passengers who wanted this pickup floor
                 elevator.UnloadPassengersAtCurrentFloor();
 
+                // Board new passengers
                 var space = elevator.AvailableCapacity;
-                if (space <= 0) continue;
-
                 var toLoad = Math.Min(space, remaining);
-                Console.WriteLine($"{space} places avilable in elevator sent to to Floor {request.FloorNumber}. {remaining} passengers remaining");
-
-                // Demo: destinations are "next floor up" to keep the POC simple/testable.
                 for (int i = 0; i < toLoad; i++)
                 {
-                    elevator.LoadPassenger(new Passenger(NextPassengerId(), request.FloorNumber + 1));
-
-                    //keep moving till the lift gets to the floor
-                    do
-                    {
-                        elevator.MoveTo(request.FloorNumber ,request.FloortoNumber);
-
-                    } while (elevator.CurrentFloor != request.FloortoNumber);
+                    elevator.LoadPassenger(new Passenger(NextPassengerId(), request.FloorNumber, request.FloortoNumber));
                 }
+
+                // Move elevator to destination floor
+                elevator.MoveTo(request.FloorNumber, request.FloortoNumber);
+
+                // Drop off
+                elevator.UnloadPassengersAtCurrentFloor();
 
                 remaining -= toLoad;
             }

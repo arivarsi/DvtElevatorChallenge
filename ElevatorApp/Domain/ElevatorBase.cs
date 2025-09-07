@@ -86,6 +86,8 @@ namespace ElevatorApp.Domain
                     // Add boarding time if we are on the pickup floor
                     if (floorfrom == CurrentFloor)
                     {
+
+                        Console.WriteLine("Arrived At PickupFloor {floorfrom}");
                         Thread.Sleep(TimeSpan.FromSeconds(BoardingSeconds));
                     }
 
@@ -107,7 +109,7 @@ namespace ElevatorApp.Domain
 
             // Ensure final arrival is registered
             ArrivedAtFloor?.Invoke(this, CurrentFloor);
-
+            Console.WriteLine("Arrived At Floor {targetFloor}");
             // Stop at target
             Stop();
             BecameIdle?.Invoke(this);

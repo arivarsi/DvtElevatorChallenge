@@ -29,7 +29,7 @@ namespace ElevatorApp.UI
             {
                 while (!stop)
                 {
-                    Console.Clear();
+                    //Console.Clear();
                     Console.WriteLine("=== DVT Elevator Challenge (Real-time) ===");
                     _controller.PrintElevatorStatus();
                     Console.WriteLine("Controls: 1) Call Elevator  2) Process Pending Requests  3) Show Elevator Status  q) Quit");
@@ -37,7 +37,6 @@ namespace ElevatorApp.UI
                     System.Threading.Thread.Sleep(1000); // refresh every second
                 }
             });
-
 
             while (true)
             {
@@ -48,9 +47,8 @@ namespace ElevatorApp.UI
 
                     switch (key.KeyChar)
                     {
-                        
                         case '1':
-                            //stop printing elevator status  because we do not want printing overwriting instructions for data entry
+                            // stop printing elevator status during input
                             stop = true;
                             Console.Write(" Enter floor to pick up: ");
                             if (int.TryParse(Console.ReadLine(), out var floor))
@@ -61,23 +59,35 @@ namespace ElevatorApp.UI
                                 Console.Write(" Passengers: ");
                                 int.TryParse(Console.ReadLine(), out var pcount);
 
-                                _controller.RequestElevator(floor,floorto, pcount == 0 ? 1 : pcount);
+                                _controller.RequestElevator(floor, floorto, pcount == 0 ? 1 : pcount);
+
+                               
+                                _controller.PrintElevatorStatus();
                             }
 
-                            stop = false; //continue after data entry
+                            stop = false;
                             break;
+
                         case '2':
                             _controller.ProcessPendingRequests();
+
+                            // 🚀 Immediately show updated state
+                            Console.Clear();
+                            _controller.PrintElevatorStatus();
+                            Console.WriteLine("Press any key to continue...");
+                            Console.ReadKey(true);
                             break;
+
                         case '3':
                             Console.Clear();
                             _controller.PrintElevatorStatus();
-                            Console.WriteLine("Press any key to continue..."); Console.ReadKey(true);
+                            Console.WriteLine("Press any key to continue...");
+                            Console.ReadKey(true);
                             break;
+
                         default:
                             break;
                     }
-                   // stop = false; //continue after data entry
                 }
                 else
                 {
@@ -85,7 +95,7 @@ namespace ElevatorApp.UI
                 }
             }
 
-           stop = false;//continue after data entry
+            stop = false;
         }
 
         private void Pause()

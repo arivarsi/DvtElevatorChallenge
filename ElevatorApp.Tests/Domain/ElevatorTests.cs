@@ -37,7 +37,7 @@ namespace ElevatorApp.Tests.Domain
         {
             ElevatorBase.SecondsPerFloor = 0;
             var elevator = new PassengerElevator(id: 1, capacity: 2, startFloor: 0);
-            var passenger = new Passenger(id: 101, destinationFloor: 3);
+            var passenger = new Passenger(id: 101,currentfloor:2 ,destinationFloor: 3);
 
             elevator.LoadPassenger(passenger);
 

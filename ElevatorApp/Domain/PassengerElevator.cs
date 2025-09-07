@@ -14,9 +14,9 @@ namespace ElevatorApp.Domain
         public PassengerElevator(int id, int capacity, int startFloor = 0)
             : base(id, capacity, startFloor) { }
       // Method to add a request/floor
-        public void AddRequest(int floor, int passengerCount = 1)
+        public void AddRequest(int startfloor, int targetFloor, int passengerCount = 1)
         {
-            Requests.Add(floor);
+            Requests.Add(startfloor);
 
              int spaceLeft = Capacity - Passengers.Count;
               int toAdd = Math.Min(spaceLeft, passengerCount);
@@ -24,11 +24,11 @@ namespace ElevatorApp.Domain
             // Add passengers as Passenger objects
             for (int i = 0; i < toAdd; i++)
              {
-                Passengers.Add(new Passenger(i,floor));
+                Passengers.Add(new Passenger(i, targetFloor, startfloor));
              }
         }
 
-        public override void MoveTo(int floorfrom, int targetFloor)
+        public override void MoveTo(int startfloor, int targetFloor)
         {
             if (targetFloor == CurrentFloor)
             {
@@ -37,7 +37,7 @@ namespace ElevatorApp.Domain
             }
 
             Console.WriteLine($"[PassengerElevator {Id}] Starting at {CurrentFloor}, moving to {targetFloor}...");
-            MoveOneStepLoop(floorfrom, targetFloor);
+            MoveOneStepLoop(startfloor, targetFloor);
             Console.WriteLine($"[PassengerElevator {Id}] Arrived at floor {CurrentFloor}.");
         }
 
