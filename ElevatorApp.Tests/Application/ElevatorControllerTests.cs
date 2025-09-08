@@ -19,9 +19,9 @@ namespace ElevatorApp.Tests.Application
 
             var controller = new ElevatorController(elevators);
 
-            controller.RequestElevator(floor: 2, floorto: 5,passengerCount: 2);
+            controller.RequestElevator(new ElevatorRequest(floorNumber: 2, floortoNumber: 5,passengerCount: 2));
 
-            controller.RequestElevator(floor: 2, floorto: 5, passengerCount: 2);
+            controller.RequestElevator(new ElevatorRequest(floorNumber: 2, floortoNumber: 5, passengerCount: 2));
 
             Assert.Equal(2, elevators[0].CurrentFloor); // Elevator 1 should move to floor 2
         }
@@ -35,7 +35,7 @@ namespace ElevatorApp.Tests.Application
 
             var controller = new ElevatorController(new List<ElevatorBase> { elevator });
 
-            controller.RequestElevator(floor: 3, floorto: 6,passengerCount: 2);
+            controller.RequestElevator(new ElevatorRequest(floorNumber: 3, floortoNumber: 6,passengerCount: 2));
 
             // Elevator cannot serve, request should remain queued
             controller.ProcessPendingRequests();

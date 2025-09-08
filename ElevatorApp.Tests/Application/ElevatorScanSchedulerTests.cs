@@ -20,7 +20,7 @@ namespace ElevatorApp.Tests.Application
             var controller = new ElevatorController(new System.Collections.Generic.List<ElevatorBase>{ e1, e2 });
 
             // Now request floor 3; e1 is moving up from 1->4 and will pass floor 3 so should be chosen
-            controller.RequestElevator(3,2, 1);
+            controller.RequestElevator(new ElevatorRequest(3, 2, 1));
 
             // The RequestElevator currently adds to PassengerElevator.Requests of chosen elevator
             Assert.Contains(3, ((PassengerElevator)e1).Requests);

@@ -40,58 +40,38 @@ namespace ElevatorApp.UI
 
             while (true)
             {
-                if (Console.KeyAvailable)
+                //read for any key entry but also read for quiting the program
+                var key = Console.ReadKey(true);
+
+                if (key.KeyChar == 'q') break;
+
+                switch (key.KeyChar)
                 {
-                    var key = Console.ReadKey(true);
-                    if (key.KeyChar == 'q') break;
+                    case '1':
+                        stop = true;
+                        Console.Write(" Enter floor to pick up: ");
+                        int floor = int.Parse(Console.ReadLine());
 
-                    switch (key.KeyChar)
-                    {
-                        case '1':
-                            // stop printing elevator status during input
-                            stop = true;
-                            Console.Write(" Enter floor to pick up: ");
-                            if (int.TryParse(Console.ReadLine(), out var floor))
-                            {
-                                Console.Write(" Enter destination Floor: ");
-                                int.TryParse(Console.ReadLine(), out var floorto);
+                        Console.Write(" Enter destination Floor: ");
+                        int floorto = int.Parse(Console.ReadLine());
 
-                                Console.Write(" Passengers: ");
-                                int.TryParse(Console.ReadLine(), out var pcount);
+                        Console.Write(" Passengers: ");
+                        int pcount = int.Parse(Console.ReadLine());
 
-                                _controller.RequestElevator(floor, floorto, pcount == 0 ? 1 : pcount);
+                        _controller.RequestElevator(new ElevatorRequest(floor, floorto, pcount == 0 ? 1 : pcount));
+                        _controller.ProcessPendingRequests();
+                        _controller.PrintElevatorStatus();
+                        stop = false;
+                        break;
 
-                               
-                                _controller.PrintElevatorStatus();
-                            }
+                    case '2':
+                        _controller.ProcessPendingRequests();
+                        _controller.PrintElevatorStatus();
+                        break;
 
-                            stop = false;
-                            break;
-
-                        case '2':
-                            _controller.ProcessPendingRequests();
-
-                            // 🚀 Immediately show updated state
-                            Console.Clear();
-                            _controller.PrintElevatorStatus();
-                            Console.WriteLine("Press any key to continue...");
-                            Console.ReadKey(true);
-                            break;
-
-                        case '3':
-                            Console.Clear();
-                            _controller.PrintElevatorStatus();
-                            Console.WriteLine("Press any key to continue...");
-                            Console.ReadKey(true);
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                    System.Threading.Thread.Sleep(200);
+                    case '3':
+                        _controller.PrintElevatorStatus();
+                        break;
                 }
             }
 

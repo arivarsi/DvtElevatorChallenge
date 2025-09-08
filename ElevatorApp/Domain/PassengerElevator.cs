@@ -13,6 +13,7 @@ namespace ElevatorApp.Domain
          public List<int> Requests { get; private set; } = new List<int>();
         public PassengerElevator(int id, int capacity, int startFloor = 0)
             : base(id, capacity, startFloor) { }
+
       // Method to add a request/floor
         public void AddRequest(int startfloor, int targetFloor, int passengerCount = 1)
         {
@@ -33,12 +34,17 @@ namespace ElevatorApp.Domain
             if (targetFloor == CurrentFloor)
             {
                 Console.WriteLine($"[PassengerElevator {Id}] Already at floor {CurrentFloor}.");
+                //offload the passenegers
+                 UnloadPassengersAtCurrentFloor();
+
                 return;
             }
 
             Console.WriteLine($"[PassengerElevator {Id}] Starting at {CurrentFloor}, moving to {targetFloor}...");
             MoveOneStepLoop(startfloor, targetFloor);
-            Console.WriteLine($"[PassengerElevator {Id}] Arrived at floor {CurrentFloor}.");
+            Console.WriteLine($"[PassengerElevator {Id}] Arrived at destination floor {CurrentFloor}.");
+            UnloadPassengersAtCurrentFloor();
+            Stop();
         }
 
         public override void Stop()

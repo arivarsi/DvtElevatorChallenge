@@ -38,29 +38,33 @@ namespace ElevatorApp.Application
 
         /// <summary>Places a new request; tries to serve immediately; queues any shortfall.</summary>
     
-        public void RequestElevator(int floor, int floorto , int passengerCount)
+        public void RequestElevator(ElevatorRequest er)
         {
             // 🚀 Immediately show updated state
             Console.Clear();
-            Console.WriteLine($"Requesting lift from floor {floor} to floor {floorto} for {passengerCount} passengers");
+            Console.WriteLine($"Requesting lift from floor {er.FloorNumber} to floor {er.FloortoNumber} for {er.PassengerCount} passengers");
             // Select closest elevator
-            var chosenElevator = SelectBestElevator(floor, floorto);
+            var chosenElevator = SelectBestElevator(er.FloorNumber, er.FloortoNumber);
 
-            // Add request and passengers
+
+            //elavator should change state towards destination
+           
             // Add request and passengers
             switch (chosenElevator)
             {
                 case PassengerElevator pe:
-                    pe.AddRequest(floor,floorto, passengerCount);
+                    pe.AddRequest(er.FloorNumber,er.FloortoNumber, er.PassengerCount);
                     break;
                 case FreightElevator fe:
                     // Treat passengerCount as "load units" for freight requests (configurable)
-                    fe.AddFreightRequest(floor, passengerCount);
+                    fe.AddFreightRequest(er.FloorNumber, er.FloortoNumber);
                     break;
                 default:
                     Console.WriteLine($"[Controller] Elevator {chosenElevator.Id} cannot accept this request type.");
                     break;
             }
+
+            chosenElevator.MoveTo(er.FloorNumber, er.FloortoNumber);
         }
 
         private ElevatorBase SelectBestElevator(int floor, int floorto)

@@ -13,9 +13,9 @@ namespace ElevatorApp.Tests.Application
             ElevatorBase.SecondsPerFloor = 0;
             var elevator = new PassengerElevator(id: 1, capacity: 2);
 
-            elevator.LoadPassenger(new Passenger(1, 5));
-            elevator.LoadPassenger(new Passenger(2, 6));
-            elevator.LoadPassenger(new Passenger(3, 7)); // should be rejected
+            elevator.LoadPassenger(new Passenger(1,6, 5));
+            elevator.LoadPassenger(new Passenger(2,6, 6));
+            elevator.LoadPassenger(new Passenger(3, 8,7)); // should be rejected
 
             Assert.Equal(2, elevator.Passengers.Count); // still only 2 loaded
         }
@@ -29,10 +29,10 @@ namespace ElevatorApp.Tests.Application
             var controller = new ElevatorController(elevators);
 
             // first request fills the elevator
-            controller.RequestElevator(floor: 1,floorto:6, passengerCount: 1);
+            controller.RequestElevator(new ElevatorRequest(floorNumber: 1,floortoNumber:6, passengerCount: 1));
 
             // second request should be queued
-            controller.RequestElevator(floor: 2, floorto:6,passengerCount: 2);
+            controller.RequestElevator(new ElevatorRequest(floorNumber: 2, floortoNumber:6,passengerCount: 2));
 
             controller.ProcessPendingRequests();
 
