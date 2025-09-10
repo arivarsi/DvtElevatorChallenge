@@ -25,13 +25,13 @@ namespace ElevatorApp.Domain
             // Add passengers as Passenger objects
             for (int i = 0; i < toAdd; i++)
              {
-                Passengers.Add(new Passenger(i, targetFloor, startfloor));
+                Passengers.Add(new Passenger(i, startfloor,targetFloor));
              }
         }
 
         public override void MoveTo(int startfloor, int targetFloor)
         {
-            if (targetFloor == CurrentFloor)
+            if (startfloor == CurrentFloor)
             {
                 Console.WriteLine($"[PassengerElevator {Id}] Already at floor {CurrentFloor}.");
                 //offload the passenegers
@@ -40,7 +40,7 @@ namespace ElevatorApp.Domain
                 return;
             }
 
-            Console.WriteLine($"[PassengerElevator {Id}] Starting at {CurrentFloor}, moving to {targetFloor}...");
+            Console.WriteLine($"[PassengerElevator {Id}] Starting at {CurrentFloor}, moving to {startfloor} then moving to {targetFloor}...");
             MoveOneStepLoop(startfloor, targetFloor);
             Console.WriteLine($"[PassengerElevator {Id}] Arrived at destination floor {CurrentFloor}.");
             UnloadPassengersAtCurrentFloor();
