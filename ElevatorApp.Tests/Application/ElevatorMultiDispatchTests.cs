@@ -7,24 +7,30 @@ namespace ElevatorApp.Tests.Application
 {
     public class ElevatorMultiDispatchTests
     {
-  [Fact]
-  public void Test_Dispatch_MultipleElevators()
-   {
-     ElevatorBase.SecondsPerFloor = 0;
+        [Fact]
+        public void Test_Dispatch_MultipleElevators()
+        {
             ElevatorBase.SecondsPerFloor = 0;
-            var elevators = new List<PassengerElevator>
-      {
-        new PassengerElevator(1, 0),
-        new PassengerElevator(2, 5),
-      };
+            var elevators = new List<ElevatorBase>
+                {
+                    new PassengerElevator(id: 1, capacity: 4, startFloor: 0),
+                    new PassengerElevator(id: 2, capacity: 4, startFloor: 5),
+                };
 
+            var controller = new ElevatorController(elevators);
 
-    // Closest elevator received request
-    Assert.Single(elevators[0].Requests);           // one floor requested
-    Assert.Equal(2, elevators[0].Passengers.Count); // 2 passengers added
-    Assert.Empty(elevators[1].Requests);            // other elevator idle
-    Assert.Empty(elevators[1].Passengers);
-   }
+            // Request: 2 passengers at floor 0 going to floor 3
+            controller.RequestElevator(new ElevatorRequest(floorNumber: 0, floortoNumber: 3, passengerCount: 2));
+
+            // Assertions
+            var passengerElevator = (PassengerElevator)elevators[0];
+            Assert.Single(passengerElevator.Requests);         // nearest elevator got the request
+            Assert.Equal(2, elevators[0].Passengers.Count);  // passengers boarded
+            var passengerElevator2 = (PassengerElevator)elevators[1];
+            Assert.Empty(passengerElevator2.Requests);             // second elevator idle
+            Assert.Empty(passengerElevator2.Passengers);
+        }
+
 
         [Fact]
         public void Should_Split_Large_Group_Across_Nearest_Elevators()

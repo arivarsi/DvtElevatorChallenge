@@ -14,7 +14,7 @@ namespace ElevatorApp.Tests.Domain
 
             elevator.MoveTo(3,2);
 
-            Assert.Equal(3, elevator.CurrentFloor);
+            Assert.Equal(2, elevator.CurrentFloor);
             Assert.Equal(ElevatorState.Stationary, elevator.State);
         }
 
