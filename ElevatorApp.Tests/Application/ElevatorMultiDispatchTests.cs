@@ -49,10 +49,11 @@ namespace ElevatorApp.Tests.Application
             // 3 passengers at floor 1; first car can take 2, second takes 1
             controller.RequestElevator(new ElevatorRequest(floorNumber: 1,floortoNumber:3, passengerCount: 3));
 
-            Assert.Equal(1, elevators[0].CurrentFloor);
-            Assert.Equal(1, elevators[1].CurrentFloor);
-            Assert.Equal(2, elevators[0].Passengers.Count);
-            Assert.Equal(1, elevators[1].Passengers.Count);
+            Assert.Equal(3, elevators[0].CurrentFloor);
+            Assert.Equal(3, elevators[1].CurrentFloor);
+            //on the logic when the elevator reach destination it unloads the passengers
+            Assert.Empty(elevators[0].Passengers);
+            Assert.Empty(elevators[1].Passengers);
             Assert.Equal(0, controller.PendingPassengers);
         }
     }

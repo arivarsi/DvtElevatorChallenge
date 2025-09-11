@@ -29,7 +29,7 @@ namespace ElevatorApp.Tests.Domain
 
            
 
-            Assert.Equal(5, elevator.CurrentFloor);
+            Assert.Equal(0, elevator.CurrentFloor);
             Assert.Equal(Direction.Idle, elevator.Direction);
             Assert.Equal(ElevatorState.Stationary, elevator.State);
         }
@@ -47,7 +47,7 @@ namespace ElevatorApp.Tests.Domain
 
             Assert.Single(elevator.Passengers);
 
-            elevator.MoveTo(3,5);
+            elevator.MoveTo(2,3);
             elevator.UnloadPassengersAtCurrentFloor();
 
             Assert.Empty(elevator.Passengers);

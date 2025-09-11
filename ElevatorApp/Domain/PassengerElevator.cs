@@ -14,38 +14,53 @@ namespace ElevatorApp.Domain
         public PassengerElevator(int id, int capacity, int startFloor = 0)
             : base(id, capacity, startFloor) { }
 
-      // Method to add a request/floor
-        public void AddRequest(int startfloor, int targetFloor, int passengerCount = 1)
+        // Method to add a request/floor
+        public void AddRequest(int startfloor, int targetFloor, int passengerCount = 1, Func<int> idGenerator = null)
         {
             Requests.Add(startfloor);
 
-             int spaceLeft = Capacity - Passengers.Count;
-              int toAdd = Math.Min(spaceLeft, passengerCount);
+            int spaceLeft = Capacity - Passengers.Count;
+            int toAdd = Math.Min(spaceLeft, passengerCount);
 
-            // Add passengers as Passenger objects
             for (int i = 0; i < toAdd; i++)
-             {
-                Passengers.Add(new Passenger(i, startfloor,targetFloor));
-             }
+            {
+                int id = idGenerator?.Invoke() ?? i; // use controller’s ID generator if provided
+                LoadPassenger(new Passenger(id, startfloor, targetFloor));
+            }
         }
 
         public override void MoveTo(int startfloor, int targetFloor)
         {
             if (startfloor == CurrentFloor)
             {
-                Console.WriteLine($"[PassengerElevator {Id}] Already at floor {CurrentFloor}.");
-                //offload the passenegers
-                 UnloadPassengersAtCurrentFloor();
+                Console.WriteLine($"[PassengerElevator {Id}] Already at pickup floor {CurrentFloor}. Opening doors...");
 
+                // Load passengers waiting at this floor
+
+                // And move directly to target
+                if (targetFloor != CurrentFloor)
+                {
+                    MoveOneStepLoop(startfloor,targetFloor);
+                }
+
+                Console.WriteLine($"[PassengerElevator {Id}] Arrived at destination floor {CurrentFloor}.");
+                UnloadPassengersAtCurrentFloor();
+                Stop();
+                return;
+            }
+            else if (targetFloor == CurrentFloor)
+            {
+                Console.WriteLine($"[PassengerElevator {Id}] Already at floor {CurrentFloor}.");
+                UnloadPassengersAtCurrentFloor();
                 return;
             }
 
             Console.WriteLine($"[PassengerElevator {Id}] Starting at {CurrentFloor}, moving to {startfloor} then moving to {targetFloor}...");
-            MoveOneStepLoop(startfloor, targetFloor);
-            Console.WriteLine($"[PassengerElevator {Id}] Arrived at destination floor {CurrentFloor}.");
+            MoveOneStepLoop(startfloor, targetFloor); Console.WriteLine($"[PassengerElevator {Id}] Arrived at destination floor {CurrentFloor}.");
             UnloadPassengersAtCurrentFloor();
             Stop();
         }
+
 
         public override void Stop()
         {

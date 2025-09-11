@@ -46,25 +46,44 @@ namespace ElevatorApp.Application
             // Select closest elevator
             var chosenElevator = SelectBestElevator(er.FloorNumber, er.FloortoNumber);
 
-
-            //elavator should change state towards destination
-           
-            // Add request and passengers
-            switch (chosenElevator)
+            if (chosenElevator.Capacity < er.PassengerCount)
             {
-                case PassengerElevator pe:
-                    pe.AddRequest(er.FloorNumber,er.FloortoNumber, er.PassengerCount);
-                    break;
-                case FreightElevator fe:
-                    // Treat passengerCount as "load units" for freight requests (configurable)
-                    fe.AddFreightRequest(er.FloorNumber, er.FloortoNumber);
-                    break;
-                default:
-                    Console.WriteLine($"[Controller] Elevator {chosenElevator.Id} cannot accept this request type.");
-                    break;
+                ServeRequest(er);
             }
+            else
+            {
+                //elavator should change state towards destination
+                // Move elevator to pickup floor first
+                if (chosenElevator.CurrentFloor != er.FloorNumber)
+                {
+                    chosenElevator.MoveTo(chosenElevator.CurrentFloor, er.FloorNumber);
+                }
 
-            chosenElevator.MoveTo(er.FloorNumber, er.FloortoNumber);
+
+               
+
+                // Add request and passengers
+                switch (chosenElevator)
+                {
+                    case PassengerElevator pe:
+                        pe.AddRequest(er.FloorNumber, er.FloortoNumber, er.PassengerCount);
+                        break;
+                    case FreightElevator fe:
+                        // Treat passengerCount as "load units" for freight requests (configurable)
+                        fe.AddFreightRequest(er.FloorNumber, er.FloortoNumber);
+                        break;
+                    default:
+                        Console.WriteLine($"[Controller] Elevator {chosenElevator.Id} cannot accept this request type.");
+                        break;
+                }
+
+                // Now move to destination
+                if (er.FloorNumber != er.FloortoNumber)
+                {
+                    chosenElevator.MoveTo(er.FloorNumber, er.FloortoNumber);
+                }
+
+            }
         }
 
         private ElevatorBase SelectBestElevator(int floor, int floorto)
